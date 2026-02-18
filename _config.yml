@@ -1,0 +1,22 @@
+# Site settings
+title: "Akardhan Sharma"
+description: "Data Analyst Portfolio | Python • SQL • Power BI"
+url: "https://akardhansharma.github.io"
+
+# Theme
+theme: jekyll-theme-cayman
+
+# Plugins (extend functionality)
+plugins:
+  - jekyll-feed        # generates an RSS feed
+  - jekyll-seo-tag     # adds SEO-friendly meta tags
+  - jekyll-sitemap     # creates a sitemap.xml for search engines
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Navigation (optional header links)
+header_pages:
+  - README.md
+
