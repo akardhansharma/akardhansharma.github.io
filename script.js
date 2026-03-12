@@ -3,17 +3,17 @@ var nav        = document.getElementById('nav');
 var hamburger  = document.getElementById('hamburger');
 var mobileMenu = document.getElementById('mobile-menu');
 var navLinks   = document.querySelectorAll('.nav-link[data-sec]');
- 
+
 window.addEventListener('scroll', function () {
   nav.classList.toggle('scrolled', window.scrollY > 20);
   updateActiveLink();
 });
- 
+
 hamburger.addEventListener('click', function () {
   hamburger.classList.toggle('open');
   mobileMenu.classList.toggle('open');
 });
- 
+
 // ─── Smooth scroll ────────────────────────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(function (a) {
   a.addEventListener('click', function (e) {
@@ -27,7 +27,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     mobileMenu.classList.remove('open');
   });
 });
- 
+
 // ─── Active nav link ──────────────────────────────────────────────────────────
 function updateActiveLink() {
   var scrollY = window.scrollY + nav.offsetHeight + 48;
@@ -42,7 +42,7 @@ function updateActiveLink() {
     });
   });
 }
- 
+
 // ─── Scroll-triggered animations ─────────────────────────────────────────────
 var observer = new IntersectionObserver(function (entries) {
   entries.forEach(function (entry) {
@@ -52,11 +52,11 @@ var observer = new IntersectionObserver(function (entries) {
     }
   });
 }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
- 
+
 document.querySelectorAll('.anim, .anim-left, .anim-right, .anim-scale').forEach(function (el) {
   observer.observe(el);
 });
- 
+
 // ─── Counter animation ────────────────────────────────────────────────────────
 function animateCounter(el) {
   var raw = el.dataset.count;
@@ -70,7 +70,7 @@ function animateCounter(el) {
   var num    = parseFloat(raw.replace(/[^0-9.]/g, ''));
   var dur    = 1500;
   var start  = null;
- 
+
   function fmt(v) {
     var s = isFloat ? v.toFixed(1) : Math.round(v).toString();
     if (hasDollar) s = '$' + s;
@@ -80,7 +80,7 @@ function animateCounter(el) {
     if (hasPlus) s += '+';
     return s;
   }
- 
+
   function step(ts) {
     if (!start) start = ts;
     var p     = Math.min((ts - start) / dur, 1);
@@ -90,7 +90,7 @@ function animateCounter(el) {
   }
   requestAnimationFrame(step);
 }
- 
+
 var counterObs = new IntersectionObserver(function (entries) {
   entries.forEach(function (entry) {
     if (entry.isIntersecting) {
@@ -99,11 +99,11 @@ var counterObs = new IntersectionObserver(function (entries) {
     }
   });
 }, { threshold: 0.5 });
- 
+
 document.querySelectorAll('[data-count]').forEach(function (el) {
   counterObs.observe(el);
 });
- 
+
 // ─── Skills tabs ──────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(function (btn) {
   btn.addEventListener('click', function () {
@@ -120,7 +120,7 @@ document.querySelectorAll('.tab-btn').forEach(function (btn) {
     });
   });
 });
- 
+
 // ─── Projects filter ──────────────────────────────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(function (btn) {
   btn.addEventListener('click', function () {
@@ -141,14 +141,14 @@ document.querySelectorAll('.filter-btn').forEach(function (btn) {
     });
   });
 });
- 
-// ─── Contact form ─────────────────────────────────────────────────────────────
+
+// ─── Contact form (Web3Forms) ─────────────────────────────────────────────────
 var form       = document.getElementById('contact-form');
 var submitBtn  = form ? form.querySelector('.form-submit') : null;
 var formFields = document.getElementById('form-fields');
 var formSucc   = document.getElementById('form-success');
 var globalErr  = document.getElementById('global-err');
- 
+
 function setErr(id, msg) {
   var errEl   = document.getElementById('err-' + id);
   var inputEl = document.getElementById(id);
@@ -161,12 +161,12 @@ function clearErr(id) {
   if (errEl)   { errEl.textContent = ''; errEl.classList.remove('show'); }
   if (inputEl) inputEl.classList.remove('err');
 }
- 
+
 ['name','email','subject','message'].forEach(function (id) {
   var el = document.getElementById(id);
   if (el) el.addEventListener('input', function () { clearErr(id); });
 });
- 
+
 function validate() {
   var ok      = true;
   var name    = (document.getElementById('name')    || {}).value || '';
@@ -180,28 +180,34 @@ function validate() {
   if (!message.trim()) { setErr('message', 'Message is required.'); ok = false; }
   return ok;
 }
- 
+
 if (form) {
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     globalErr.style.display = 'none';
     if (!validate()) return;
- 
+
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
- 
-    fetch('https://formspree.io/f/xzzeqrog', {
+
+    var formData = new FormData(form);
+    formData.append('access_key', 'ecc2342a-79c6-4743-ad69-18a6b7f22d8c');
+    formData.append('subject', document.getElementById('subject').value);
+    formData.append('from_name', 'Portfolio Contact Form');
+
+    fetch('https://api.web3forms.com/submit', {
       method:  'POST',
-      body:    new FormData(form),
+      body:    formData,
       headers: { 'Accept': 'application/json' }
     })
-    .then(function (res) {
-      if (res.ok) {
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.success) {
         formFields.style.display = 'none';
         formSucc.classList.add('show');
       } else {
-        globalErr.textContent    = 'Something went wrong. Please try again.';
-        globalErr.style.display  = 'block';
+        globalErr.textContent   = data.message || 'Something went wrong. Please try again.';
+        globalErr.style.display = 'block';
       }
     })
     .catch(function () {
